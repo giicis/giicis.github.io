@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>GIICIS</title>
+    <link>https://leo-hoet.github.io/bloggiicis/</link>
+    <description>Recent content on GIICIS</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <managingEditor>youremail@domain.com (Leonardo Hoet)</managingEditor>
+    <webMaster>youremail@domain.com (Leonardo Hoet)</webMaster>
+    
+	<atom:link href="https://leo-hoet.github.io/bloggiicis/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+  </channel>
+</rss>
