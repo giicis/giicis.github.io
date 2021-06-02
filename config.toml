@@ -1,4 +1,4 @@
-baseurl = "https://leo-hoet.github.io/"
+baseurl = "https://giicis.github.io/"
 DefaultContentLanguage = "en"
 title = "GIICIS"
 theme = "beautifulhugo"
