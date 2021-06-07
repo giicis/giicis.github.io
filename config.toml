@@ -47,10 +47,9 @@ showRelatedPosts = true
 [Author]
 name = "Leonardo Hoet"
 #website = "yourwebsite.com"
-email = "youremail@domain.com"
-github = "username"
-linkedin = "username"
-youtube = "user/username" # or channel/channelname
+email = "leohoet98@gmail.com"
+github = "giicis"
+youtube = "channel/UCYru8NLyuEV30k6-p8doo6w" # or channel/channelname
 
 [[menu.main]]
 name = "Blog"

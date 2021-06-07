@@ -5,4 +5,4 @@ draft: false
 ---
 
 # About us
-We are a intetigation group from UTN ....
+We are an investigation group from [UTN FRCU](http://www.frcu.utn.edu.ar/)

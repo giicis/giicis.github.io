@@ -4,8 +4,8 @@ date: 2021-05-28T23:02:38-03:00
 subtitle: ""
 linksAuthors : {"/members/leonardo-hoet" : "Leonardo Hoet"}
 image: ""
-tags: ["optimization", "cbc",]
-draft: false
+tags: ["optimization", "cbc","example"]
+draft: true
 ---
 
 NRP problem are a type of problem...
