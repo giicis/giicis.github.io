@@ -14,10 +14,10 @@ pygmentsCodefencesGuessSyntax = true
 
 [Params]
 #  homeTitle = "Beautiful Hugo Theme" # Set a different text for the header on the home page
-subtitle = "AI and software engineering investigation group"
+subtitle = "Computational intelligence and software engineering investigation group"
 mainSections = ["post", "posts"]
-logo = "giicis.png" # Expecting square dimensions
-favicon = "img/favicon.ico"
+logo = "giicis.png"                                                                  # Expecting square dimensions
+favicon = "fgiicis.ico"
 dateFormat = "January 2, 2006"
 commit = false
 rss = false
@@ -29,6 +29,7 @@ useHLJS = true
 socialShare = true
 delayDisqus = true
 showRelatedPosts = true
+
 #  hideAuthor = true
 #  gcse = "012345678901234567890:abcdefghijk" # Get your code from google.com/cse. Make sure to go to "Look and Feel" and change Layout to "Full Width" and Theme to "Classic"
 
