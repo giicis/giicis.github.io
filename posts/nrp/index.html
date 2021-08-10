@@ -1,0 +1,428 @@
+<!doctype html><html lang=en itemscope itemtype=http://schema.org/WebPage>
+<head>
+<meta charset=utf-8>
+<meta http-equiv=x-ua-compatible content="IE=edge">
+<meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1">
+<title>Next release problem - GIICIS</title>
+<meta name=description content="A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with this problem.">
+<meta name=author content="Leonardo Hoet"><script type=application/ld+json>{"@context":"http://schema.org","@type":"WebSite","name":"GIICIS","url":"https:\/\/giicis.github.io\/"}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Organization","name":"","url":"https:\/\/giicis.github.io\/"}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/giicis.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/giicis.github.io\/posts\/nrp\/","name":"Next release problem"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Leonardo Hoet"},"headline":"Next release problem","description":"A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders\u0027 needs. In this blog, we aim to define a formal model that can help us with this problem.\n","inLanguage":"en","wordCount":1433,"datePublished":"2021-08-08T23:02:38","dateModified":"2021-08-08T23:02:38","image":"https:\/\/giicis.github.io\/giicis.png","keywords":["optimization, cbc"],"mainEntityOfPage":"https:\/\/giicis.github.io\/posts\/nrp\/","publisher":{"@type":"Organization","name":"https:\/\/giicis.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/giicis.github.io\/giicis.png","height":60,"width":60}}}</script>
+<meta property="og:title" content="Next release problem">
+<meta property="og:description" content="A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with this problem.">
+<meta property="og:image" content="https://giicis.github.io/giicis.png">
+<meta property="og:url" content="https://giicis.github.io/posts/nrp/">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GIICIS">
+<meta name=twitter:title content="Next release problem">
+<meta name=twitter:description content="A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with …">
+<meta name=twitter:image content="https://giicis.github.io/giicis.png">
+<meta name=twitter:card content="summary">
+<link href=https://giicis.github.io/fgiicis.ico rel=icon type=image/x-icon>
+<meta name=generator content="Hugo 0.87.0">
+<link rel=alternate href=https://giicis.github.io/index.xml type=application/rss+xml title=GIICIS><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css integrity=sha384-9eLZqc9ds8eNjO3TmqPeYcDj8n+Qfa4nuSiGYa6DjLNcv9BtN69ZIulL9+8CqC9Y crossorigin=anonymous>
+<link rel=stylesheet href=https://use.fontawesome.com/releases/v5.5.0/css/all.css integrity=sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU crossorigin=anonymous>
+<link rel=stylesheet href=https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css integrity=sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u crossorigin=anonymous><link rel=stylesheet href=https://giicis.github.io/css/main.css><link rel=stylesheet href="https://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic">
+<link rel=stylesheet href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800">
+<link rel=stylesheet href=https://giicis.github.io/css/highlight.min.css><link rel=stylesheet href=https://giicis.github.io/css/codeblock.css><link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.css integrity=sha384-h/L2W9KefUClHWaty3SLE5F/qvc4djlyR4qY3NUV5HGQBBW7stbcfff1+I/vmsHh crossorigin=anonymous>
+<link rel=stylesheet href=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/default-skin/default-skin.min.css integrity=sha384-iD0dNku6PYSIQLyfTOpB06F2KCZJAKLOThS5HRe8b3ibhdEQ6eKsFf/EeFxdOt5R crossorigin=anonymous>
+</head>
+<body>
+<nav class="navbar navbar-default navbar-fixed-top navbar-custom">
+<div class=container-fluid>
+<div class=navbar-header>
+<button type=button class=navbar-toggle data-toggle=collapse data-target=#main-navbar>
+<span class=sr-only>Toggle navigation</span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+<span class=icon-bar></span>
+</button>
+<a class=navbar-brand href=https://giicis.github.io/>GIICIS</a>
+</div>
+<div class="collapse navbar-collapse" id=main-navbar>
+<ul class="nav navbar-nav navbar-right">
+<li>
+<a title=Blog href=/>Blog</a>
+</li>
+<li>
+<a title=Posts href=/posts>Posts</a>
+</li>
+<li>
+<a title=Members href=/members>Members</a>
+</li>
+<li>
+<a title=About href=/page/about>About</a>
+</li>
+<li>
+<a title=Tags href=/tags>Tags</a>
+</li>
+</ul>
+</div>
+<div class=avatar-container>
+<div class=avatar-img-border>
+<a title=GIICIS href=https://giicis.github.io/>
+<img class=avatar-img src=https://giicis.github.io/giicis.png alt=GIICIS>
+</a>
+</div>
+</div>
+</div>
+</nav>
+<div class=pswp tabindex=-1 role=dialog aria-hidden=true>
+<div class=pswp__bg></div>
+<div class=pswp__scroll-wrap>
+<div class=pswp__container>
+<div class=pswp__item></div>
+<div class=pswp__item></div>
+<div class=pswp__item></div>
+</div>
+<div class="pswp__ui pswp__ui--hidden">
+<div class=pswp__top-bar>
+<div class=pswp__counter></div>
+<button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+<div class=pswp__preloader>
+<div class=pswp__preloader__icn>
+<div class=pswp__preloader__cut>
+<div class=pswp__preloader__donut></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+<div class=pswp__share-tooltip></div>
+</div>
+<button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+</button>
+<div class=pswp__caption>
+<div class=pswp__caption__center></div>
+</div>
+</div>
+</div>
+</div>
+<header class=header-section>
+<div class="intro-header no-img">
+<div class=container>
+<div class=row>
+<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<div class=posts-heading>
+<h1>Next release problem</h1>
+<hr class=small>
+</div>
+</div>
+</div>
+</div>
+</div>
+</header>
+<div class=container role=main>
+<div class=row>
+<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<article role=main class=blog-post>
+<p>A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with this problem.</p>
+<h1 id=introduction>Introduction</h1>
+<p>As we have said, a big problem in every software development project is to determine a set of requirements which satisfies all parts involved (stakeholders). The next release problem (NRP) provides a formal mathematical model to this problem. This problems aims to find a subset of requirements that optimize a wanted attribute, such as profit or cost, given that we have to fulfill stakeholders' needs.
+NRP can be reduced to the <a href=https://en.wikipedia.org/wiki/Knapsack_problem>knapsack problem</a> which, in the end, is a NP-Hard problem.</p>
+<p>To implement this model we will need the following information</p>
+<ul>
+<li>Requirements in the project. For each one:
+<ul>
+<li>How much it will cost</li>
+</ul>
+</li>
+<li>Number of stakeholders in the project. For each one of them we&rsquo;ll need:
+<ul>
+<li>The set of requirements in which the stakeholder has interest</li>
+<li>A metric to measure the impact if the stakeholder is satisfied</li>
+</ul>
+</li>
+<li>Maximum cost the next release can have</li>
+</ul>
+<h2 id=formal-definition-of-nrp-mono-objective>Formal definition of NRP Mono-Objective</h2>
+<p>The problem can be addressed as a mixed integer linear programming (MILP) model. The next model assumes that the decision maker wants to maximize the profit subject to a cost restriction.</p>
+<ul>
+<li>Let \(S\) be the set of stakeholders with \(|S| = n\)</li>
+<li>Let \(R\) be the set of requirements with \(|R| = m\)</li>
+<li>Let \(p\) be the maximum affordable cost</li>
+<li>Let \(X = [x_1 , x_2 , … ,x_n ]\) be a binary array where the value of the cell \( i = 1\) if requirement \(i\) is implemented. \( 0 \) otherwise</li>
+<li>Let \(Y = [y_1, y_2,…,y_m]\) be a binary array where the value of the cell \( j = 1\) if the stakeholder \(j\) is satisfied (that means, all of his requirements are implemented in the next release). \( 0 \) otherwise.</li>
+<li>Let \(C = [c_1, c_2, …, c_n ]\) be an array of cost per requirement.</li>
+<li>Let \(B = [b_1, b_2 ,… ,b_m]\) be the profit per stakeholder if it is satisfied.</li>
+<li>Let \(P\) be the precedence relation between \((i,j)\) where \(i,j\) are requirements; meaning that requirement \(i\) must be selected if requirement \(j \)is selected. i.e. To implement \(j\), first implement \(i\)</li>
+<li>Let \( I\) be the interest relation \((i,k)\) where stakeholder \(k\) has interest over requirement \(i\).</li>
+</ul>
+<p>With this parameters, the model looks like:</p>
+<p>$$
+max \ f(Y) = \sum_{i \in S} b_i \cdot y_i
+$$</p>
+<p>subject to</p>
+<ol>
+<li>
+<p>A cost restriction. The cost of implementing each requirement needs to be less than the maximum affordable cost
+$$
+\sum_{j \in R} c_j \cdot x_j \leq p
+$$</p>
+</li>
+<li>
+<p>A precedence restriction. If requirement \(x_j\) needs to be implemented (i.e. \(x_j = 1\) \(x_i\) must be equal to 1 in order to not violate this restriction
+$$
+x_i \geq x_j \quad \forall (i,j) \in P
+$$</p>
+</li>
+<li>
+<p>An interest constraint. This restriction is used to set \(y_k\) if requirement \(x_i\) is implemented. Since the objective function is a maximization, if \(x_i\) is implemented, \(y_k\) is automatically set to 1 because it maximize the objective.
+$$
+x_i \geq y_k \quad \forall (i,k) \in I
+$$</p>
+</li>
+<li>
+<p>Binary constraints
+$$
+X \in \lbrace0,1\rbrace^n
+$$
+$$
+Y \in \lbrace0,1\rbrace^n
+$$</p>
+</li>
+</ol>
+<h1 id=implementing-nrp-in-python>Implementing NRP in python</h1>
+<p>We&rsquo;ll be using python to find an optimal solution of this problem. Python has an excellent collection of libraries to model the problem. Moreover, these libraries are capable of calling low level solvers such as CBC or CPLEX to solve the model. So python&rsquo;s speed will not affect us, since these solvers are written in C/C++.</p>
+<p>We are renaming the parameters in order to achieve a more readable code.</p>
+<p>First, let&rsquo;s begin with importing the needing libraries</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>pyomo.environ</span> <span class=k>as</span> <span class=nn>pyo</span>
+<span class=kn>from</span> <span class=nn>pyomo.environ</span> <span class=kn>import</span> <span class=n>AbstractModel</span>
+</code></pre></div><p><a href=http://www.pyomo.org/>Pyomo</a> is a library that provide common language for modelling and is able to call different solvers.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Create and abstract model</span>
+<span class=n>nrp_abs</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>AbstractModel</span><span class=p>()</span>
+
+<span class=c1># Assign parameters to the model</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_requirements</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_costumers</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>,</span> <span class=n>mutable</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
+
+<span class=c1># Sets used to maintain data of customers and requirements</span>
+
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_requirements</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_costumers</span><span class=p>)</span>
+
+
+<span class=c1># Parameters for the model</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>profit</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span><span class=p>)</span>  <span class=c1># Profit of each customer if it is satisfied</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>  <span class=c1># Cost of implementing each requirement</span>
+
+
+<span class=c1># (i,j) requirement i should be implemented if j is implemented</span>
+<span class=c1># Set is within the cross product of Requirements X Requirements</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>prerequisite</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span> <span class=o>*</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+<span class=c1># (i,k) this relation exists if stakeholder k has interest on requirement i</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span> <span class=o>*</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+
+<span class=c1># Creation of variables</span>
+<span class=c1># x = 1 if requirement i is implemented in the next release, otherwise 0</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
+<span class=c1># y = 1 if all customer requirements are satisfied in the next release, otherwise 0</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
+
+<span class=c1># Objective function</span>
+<span class=k>def</span> <span class=nf>obj_expression</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>):</span>
+    <span class=c1># Model should maximize profit of the next release</span>
+    <span class=k>return</span> <span class=n>pyo</span><span class=o>.</span><span class=n>summation</span><span class=p>(</span><span class=n>nrp</span><span class=o>.</span><span class=n>profit</span><span class=p>,</span> <span class=n>nrp</span><span class=o>.</span><span class=n>y</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>OBJ</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Objective</span><span class=p>(</span><span class=n>rule</span><span class=o>=</span><span class=n>obj_expression</span><span class=p>,</span> <span class=n>sense</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>maximize</span><span class=p>)</span>
+
+
+<span class=c1># Definition of cost constraint rule</span>
+<span class=k>def</span> <span class=nf>cost_constraint_rule</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>):</span>
+    <span class=c1># Cost should be keep under a predefined cost</span>
+    <span class=k>return</span> <span class=n>pyo</span><span class=o>.</span><span class=n>summation</span><span class=p>(</span><span class=n>nrp</span><span class=o>.</span><span class=n>cost</span><span class=p>,</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>max_cost</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>cost_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>rule</span><span class=o>=</span><span class=n>cost_constraint_rule</span><span class=p>)</span>
+
+
+<span class=c1># Defection of precedence constraint</span>
+<span class=k>def</span> <span class=nf>precedence_constraint_rule</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>,</span> <span class=n>i</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>j</span><span class=p>:</span> <span class=nb>int</span><span class=p>):</span>
+    <span class=k>return</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&gt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>j</span><span class=p>]</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>precedence_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>prerequisite</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>precedence_constraint_rule</span><span class=p>)</span>
+
+<span class=c1># Definition of interest constraint</span>
+<span class=c1># Each tuple in nrp.dat.interest is inverted, so the constraint is also inverted</span>
+<span class=k>def</span> <span class=nf>interest_constraint_rule</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>,</span> <span class=n>i</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>k</span><span class=p>:</span> <span class=nb>int</span><span class=p>):</span>
+    <span class=k>return</span> <span class=n>nrp</span><span class=o>.</span><span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>k</span><span class=p>]</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>interest_constraint_rule</span><span class=p>)</span>
+</code></pre></div><p>Now, we have an abstract model. This is very powerful, we can provide different datasets to see how the model performs.</p>
+<p>Lets fill the model with actual data and solve it.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>data_file_path</span> <span class=o>=</span> <span class=s1>&#39;../datasets/nrp_100c_140r.dat&#39;</span>
+<span class=n>nrp_concrete</span> <span class=o>=</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>create_instance</span><span class=p>(</span><span class=n>data_file_path</span><span class=p>)</span>
+</code></pre></div><h2 id=solving-the-model>Solving the model</h2>
+<p>We are using <a href=https://github.com/coin-or/Cbc>CBC</a> because it&rsquo;s an open source and fast, but if you desire you can use different solvers.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>pyomo.environ</span> <span class=kn>import</span> <span class=n>SolverFactory</span>
+<span class=n>nrp_concrete</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=mi>100</span>
+<span class=n>solver</span> <span class=o>=</span> <span class=n>SolverFactory</span><span class=p>(</span><span class=s1>&#39;cbc&#39;</span><span class=p>)</span>
+<span class=n>res</span> <span class=o>=</span> <span class=n>solver</span><span class=o>.</span><span class=n>solve</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=p>)</span>
+<span class=n>res</span><span class=o>.</span><span class=n>write</span><span class=p>()</span>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text># ==========================================================
+# = Solver Results                                         =
+# ==========================================================
+# ----------------------------------------------------------
+#   Problem Information
+# ----------------------------------------------------------
+Problem: 
+- Name: unknown
+  Lower bound: 563.0
+  Upper bound: 563.0
+  Number of objectives: 1
+  Number of constraints: 375
+  Number of variables: 228
+  Number of binary variables: 240
+  Number of integer variables: 240
+  Number of nonzeros: 100
+  Sense: maximize
+# ----------------------------------------------------------
+#   Solver Information
+# ----------------------------------------------------------
+Solver: 
+- Status: ok
+  User time: -1.0
+  System time: 0.15
+  Wallclock time: 0.16
+  Termination condition: optimal
+  Termination message: Model was solved to optimality (subject to tolerances), and an optimal solution is available.
+  Statistics: 
+    Branch and bound: 
+      Number of bounded subproblems: 8
+      Number of created subproblems: 8
+    Black box: 
+      Number of iterations: 353
+  Error rc: 0
+  Time: 0.17249560356140137
+# ----------------------------------------------------------
+#   Solution Information
+# ----------------------------------------------------------
+Solution: 
+- number of solutions: 0
+  number of solutions displayed: 0
+</code></pre></div><p>As you can see, CBC has found an optimal solution in 0.17 seconds.</p>
+<h2 id=exploring-the-solution>Exploring the solution</h2>
+<p>We can see the whole model using <code>pyo.display(nrp_concrete)</code> or we can use <code>pyo.display</code> on the parts where we are interested</p>
+<p>If we print the objective function, we&rsquo;ll get:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Print the value of the objective function</span>
+<span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=o>.</span><span class=n>OBJ</span><span class=p>)</span>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>OBJ : Size=1, Index=None, Active=True
+    Key  : Active : Value
+    None :   True : 985.0
+</code></pre></div><p>That means, the optimal solution for this model costs 985 monetary units.</p>
+<p>If we want to see which requirements should be implemented, we have to display the variables associated with them.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Display of variables associated to requirements</span>
+<span class=c1># Value == 1 means the requirement is implemented</span>
+<span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>Variables:
+    x : Size=140, Index=requirements
+        Key : Lower : Value : Upper : Fixed : Stale : Domain
+          1 :     0 :   0.0 :     1 : False : False : Binary
+          2 :     0 :   1.0 :     1 : False : False : Binary
+          3 :     0 :   1.0 :     1 : False : False : Binary
+          4 :     0 :   0.0 :     1 : False : False : Binary
+          5 :     0 :   0.0 :     1 : False : False : Binary
+          6 :     0 :   0.0 :     1 : False : False : Binary
+          7 :     0 :   1.0 :     1 : False : False : Binary
+          8 :     0 :   0.0 :     1 : False : False : Binary
+</code></pre></div><p>We have cut down the output to make it more readable.
+In this output, the variables with value of 1 are the ones that should be implemented.</p>
+<h1 id=conclusion>Conclusion</h1>
+<p>This model can be very helpful in an environment with multiple stakeholders and multiple requirements. It can help
+us reducing the complexity of making a decision. But what if we want to plan the releases for the whole project? In next blog posts we&rsquo;ll address this problem with another model.</p>
+<div class=blog-tags>
+<a href=https://giicis.github.io//tags/optimization/>optimization</a>&nbsp;
+<a href=https://giicis.github.io//tags/cbc/>cbc</a>&nbsp;
+</div>
+<hr>
+<section id=social-share>
+<div class="list-inline footer-links">
+<div class=share-box aria-hidden=true>
+<ul class=share>
+<li>
+<a href="//twitter.com/share?url=https%3a%2f%2fgiicis.github.io%2fposts%2fnrp%2f&text=Next%20release%20problem&via=" target=_blank title="Share on Twitter">
+<i class="fab fa-twitter"></i>
+</a>
+</li>
+<li>
+<a href="//www.facebook.com/sharer/sharer.php?u=https%3a%2f%2fgiicis.github.io%2fposts%2fnrp%2f" target=_blank title="Share on Facebook">
+<i class="fab fa-facebook"></i>
+</a>
+</li>
+<li>
+<a href="//reddit.com/submit?url=https%3a%2f%2fgiicis.github.io%2fposts%2fnrp%2f&title=Next%20release%20problem" target=_blank title="Share on Reddit">
+<i class="fab fa-reddit"></i>
+</a>
+</li>
+<li>
+<a href="//www.linkedin.com/shareArticle?url=https%3a%2f%2fgiicis.github.io%2fposts%2fnrp%2f&title=Next%20release%20problem" target=_blank title="Share on LinkedIn">
+<i class="fab fa-linkedin"></i>
+</a>
+</li>
+</ul>
+</div>
+</div>
+</section>
+</article>
+<ul class="pager blog-pager">
+<li class=previous>
+<a href=https://giicis.github.io/posts/hello-world/ data-toggle=tooltip data-placement=top title="Hello World">&larr; Previous Post</a>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<footer>
+<div class=container>
+<div class=row>
+<div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+<ul class="list-inline text-center footer-links">
+<li>
+<a href=mailto:leohoet98@gmail.com title="Email me">
+<span class="fa-stack fa-lg">
+<i class="fas fa-circle fa-stack-2x"></i>
+<i class="fas fa-envelope fa-stack-1x fa-inverse"></i>
+</span>
+</a>
+</li>
+<li>
+<a href=https://github.com/giicis title=GitHub>
+<span class="fa-stack fa-lg">
+<i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-github fa-stack-1x fa-inverse"></i>
+</span>
+</a>
+</li>
+<li>
+<a href=https://www.youtube.com/channel/UCYru8NLyuEV30k6-p8doo6w title=Youtube>
+<span class="fa-stack fa-lg">
+<i class="fas fa-circle fa-stack-2x"></i>
+<i class="fab fa-youtube fa-stack-1x fa-inverse"></i>
+</span>
+</a>
+</li>
+</ul>
+<p class="credits copyright text-muted">
+Leonardo Hoet
+&nbsp;&bull;&nbsp;&copy;
+2021
+&nbsp;&bull;&nbsp;
+<a href=https://giicis.github.io/>GIICIS</a>
+</p>
+<p class="credits theme-by text-muted">
+<a href=https://gohugo.io>Hugo v0.87.0</a> powered &nbsp;&bull;&nbsp; Theme <a href=https://github.com/halogenica/beautifulhugo>Beautiful Hugo</a> adapted from <a href=https://deanattali.com/beautiful-jekyll/>Beautiful Jekyll</a>
+</p>
+</div>
+</div>
+</div>
+</footer><script src=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.js integrity=sha384-K3vbOmF2BtaVai+Qk37uypf7VrgBubhQreNQe9aGsz9lB63dIFiQVlJbr92dw2Lx crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/contrib/auto-render.min.js integrity=sha384-kmZOZB5ObwgQnS/DuDg6TScgOiWWBiVt0plIRkZCmE6rDZGrEOQeHM5PcHi+nyqe crossorigin=anonymous></script>
+<script src=https://code.jquery.com/jquery-1.12.4.min.js integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin=anonymous></script>
+<script src=https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js integrity=sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa crossorigin=anonymous></script>
+<script src=https://giicis.github.io/js/main.js></script>
+<script src=https://giicis.github.io/js/highlight.min.js></script>
+<script>hljs.initHighlightingOnLoad()</script>
+<script>$(document).ready(function(){$("pre.chroma").css("padding","0")})</script><script>renderMathInElement(document.body)</script><script src=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe.min.js integrity=sha384-QELNnmcmU8IR9ZAykt67vGr9/rZJdHbiWi64V88fCPaOohUlHCqUD/unNN0BXSqy crossorigin=anonymous></script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/photoswipe/4.1.2/photoswipe-ui-default.min.js integrity=sha384-m67o7SkQ1ALzKZIFh4CiTA8tmadaujiTa9Vu+nqPSwDOqHrDmxLezTdFln8077+q crossorigin=anonymous></script><script src=https://giicis.github.io/js/load-photoswipe.js></script>
+</body>
+</html>
