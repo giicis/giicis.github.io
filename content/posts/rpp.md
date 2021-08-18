@@ -7,7 +7,7 @@ image: ""
 tags: ["optimization","cbc","rpp","linear programming"]
 draft: false
 ---
-A more powerful model than the next release problem which can provide an schedule of how a project need to plan its releases.
+A more powerful model than the next release problem which can provide a schedule of how a project need to plan its releases.
 
 
 <!--more-->
