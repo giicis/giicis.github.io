@@ -6,7 +6,7 @@
 <title>Next release problem - GIICIS</title>
 <meta name=description content="A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with this problem.">
 <meta name=author content="Leonardo Hoet"><script type=application/ld+json>{"@context":"http://schema.org","@type":"WebSite","name":"GIICIS","url":"https:\/\/giicis.github.io\/"}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Organization","name":"","url":"https:\/\/giicis.github.io\/"}</script>
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/giicis.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/giicis.github.io\/posts\/nrp\/","name":"Next release problem"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Leonardo Hoet"},"headline":"Next release problem","description":"A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders\u0027 needs. In this blog, we aim to define a formal model that can help us with this problem.\n","inLanguage":"en","wordCount":1433,"datePublished":"2021-08-08T23:02:38","dateModified":"2021-08-08T23:02:38","image":"https:\/\/giicis.github.io\/giicis.png","keywords":["optimization, cbc"],"mainEntityOfPage":"https:\/\/giicis.github.io\/posts\/nrp\/","publisher":{"@type":"Organization","name":"https:\/\/giicis.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/giicis.github.io\/giicis.png","height":60,"width":60}}}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/giicis.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/giicis.github.io\/posts\/nrp\/","name":"Next release problem"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Leonardo Hoet"},"headline":"Next release problem","description":"A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders\u0027 needs. In this blog, we aim to define a formal model that can help us with this problem.\n","inLanguage":"en","wordCount":1733,"datePublished":"2021-08-08T23:02:38","dateModified":"2021-08-08T23:02:38","image":"https:\/\/giicis.github.io\/giicis.png","keywords":["optimization, cbc"],"mainEntityOfPage":"https:\/\/giicis.github.io\/posts\/nrp\/","publisher":{"@type":"Organization","name":"https:\/\/giicis.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/giicis.github.io\/giicis.png","height":60,"width":60}}}</script>
 <meta property="og:title" content="Next release problem">
 <meta property="og:description" content="A common problem in every software project is which requirement should the team implement in order to satisfy stakeholders' needs. In this blog, we aim to define a formal model that can help us with this problem.">
 <meta property="og:image" content="https://giicis.github.io/giicis.png">
@@ -187,58 +187,111 @@ $$</p>
 </li>
 </ol>
 <h1 id=implementing-nrp-in-python>Implementing NRP in python</h1>
-<p>We&rsquo;ll be using python to find an optimal solution of this problem. Python has an excellent collection of libraries to model the problem. Moreover, these libraries are capable of calling low level solvers such as CBC or CPLEX to solve the model. So python&rsquo;s speed will not affect us, since these solvers are written in C/C++.</p>
+<h2 id=fictional-problem>Fictional problem</h2>
+<p>To give a more user friendly proof of concept let&rsquo;s define a simple problem.</p>
+<p>In this problem, we have 5 requirements, 2 stakeholders (A and B) and a maximum cost of 100. This cost can be anything you want, such as time or money.</p>
+<p>Stakeholder A has a profit of 70 and has interest in requirement 2 and 5. On the other hand, stakeholder B has a profit of 50 and has interest in requirement 1,3 and 4.</p>
+<p>To implement requirement 5 we need to implement requirement 1 and 3.</p>
+<p>The cost of each requirement is the following</p>
+<table>
+<thead>
+<tr>
+<th>Requirement</th>
+<th>Cost</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>40</td>
+</tr>
+<tr>
+<td>2</td>
+<td>30</td>
+</tr>
+<tr>
+<td>3</td>
+<td>20</td>
+</tr>
+<tr>
+<td>4</td>
+<td>60</td>
+</tr>
+<tr>
+<td>5</td>
+<td>10</td>
+</tr>
+</tbody>
+</table>
+<p>With this information, we can create a file <code>data.dat</code></p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>param number_of_requirements := 5;
+param number_of_stakeholders := 2;
+param max_cost := 80
+
+set prerequisite := (1, 5)  (1, 3);
+set interest := (1, 2) (1, 5) (2,1) (2, 3) (2,5);
+
+param cost :=
+1 40
+2 30
+3 20
+4 60
+5 10;
+
+param profit := 
+1 70
+2 50;
+</code></pre></div><p>We&rsquo;ll be using python to find an optimal solution of this problem. Python has an excellent collection of libraries to model the problem. Moreover, these libraries are capable of calling low level solvers such as CBC or CPLEX to solve the model. So python&rsquo;s speed will not affect us, since these solvers are written in C/C++.</p>
 <p>We are renaming the parameters in order to achieve a more readable code.</p>
 <p>First, let&rsquo;s begin with importing the needing libraries</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>import</span> <span class=nn>pyomo.environ</span> <span class=k>as</span> <span class=nn>pyo</span>
 <span class=kn>from</span> <span class=nn>pyomo.environ</span> <span class=kn>import</span> <span class=n>AbstractModel</span>
-</code></pre></div><p><a href=http://www.pyomo.org/>Pyomo</a> is a library that provide common language for modelling and is able to call different solvers.</p>
+</code></pre></div><p><a href=http://www.pyomo.org/>Pyomo</a> is a library that provide common language for modelling and is able to call different solvers. In this example code, we&rsquo;ll create an abstract model so anyone can provide its custom data file and find an optimal solution, but you can also define the data inside the model and create a concrete model.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Create and abstract model</span>
 <span class=n>nrp_abs</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>AbstractModel</span><span class=p>()</span>
 
 <span class=c1># Assign parameters to the model</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_requirements</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>)</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_costumers</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_stakeholders</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>)</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>NonNegativeIntegers</span><span class=p>,</span> <span class=n>mutable</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
 
-<span class=c1># Sets used to maintain data of customers and requirements</span>
-
+<span class=c1># Sets used to maintain data of customers and requeriments</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_requirements</span><span class=p>)</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_costumers</span><span class=p>)</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>stakeholders</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>number_of_stakeholders</span><span class=p>)</span>
 
 
 <span class=c1># Parameters for the model</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>profit</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span><span class=p>)</span>  <span class=c1># Profit of each customer if it is satisfied</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>  <span class=c1># Cost of implementing each requirement</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>profit</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>)</span>  <span class=c1># Profit of each customer if it is satisfied</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>  <span class=c1># Cost of implementing each requierement</span>
 
 
-<span class=c1># (i,j) requirement i should be implemented if j is implemented</span>
-<span class=c1># Set is within the cross product of Requirements X Requirements</span>
+<span class=c1># (i,j) requierement i should be implemented if j is implemented</span>
+<span class=c1># Set is within the cross product of Requierements X Requierements</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>prerequisite</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span> <span class=o>*</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
-<span class=c1># (i,k) this relation exists if stakeholder k has interest on requirement i</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span> <span class=o>*</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+<span class=c1># (i,k) this relation exists if stakeholder k has interest on requierement i</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>stakeholders</span> <span class=o>*</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
 
 <span class=c1># Creation of variables</span>
-<span class=c1># x = 1 if requirement i is implemented in the next release, otherwise 0</span>
+<span class=c1># x = 1 if requierement i is implemented in the next release, otherwise 0</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
-<span class=c1># y = 1 if all customer requirements are satisfied in the next release, otherwise 0</span>
-<span class=n>nrp_abs</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>customers</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
+<span class=c1># y = 1 if all customer requierements are satisfied in the next release, otherwise 0</span>
+<span class=n>nrp_abs</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
 
-<span class=c1># Objective function</span>
+<span class=c1># Objetive function</span>
 <span class=k>def</span> <span class=nf>obj_expression</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>):</span>
     <span class=c1># Model should maximize profit of the next release</span>
     <span class=k>return</span> <span class=n>pyo</span><span class=o>.</span><span class=n>summation</span><span class=p>(</span><span class=n>nrp</span><span class=o>.</span><span class=n>profit</span><span class=p>,</span> <span class=n>nrp</span><span class=o>.</span><span class=n>y</span><span class=p>)</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>OBJ</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Objective</span><span class=p>(</span><span class=n>rule</span><span class=o>=</span><span class=n>obj_expression</span><span class=p>,</span> <span class=n>sense</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>maximize</span><span class=p>)</span>
 
 
-<span class=c1># Definition of cost constraint rule</span>
+<span class=c1># Defintion of cost constraint rule</span>
 <span class=k>def</span> <span class=nf>cost_constraint_rule</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>):</span>
-    <span class=c1># Cost should be keep under a predefined cost</span>
+    <span class=c1># Cost should be maintened under a predefined cost</span>
     <span class=k>return</span> <span class=n>pyo</span><span class=o>.</span><span class=n>summation</span><span class=p>(</span><span class=n>nrp</span><span class=o>.</span><span class=n>cost</span><span class=p>,</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>max_cost</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>cost_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>rule</span><span class=o>=</span><span class=n>cost_constraint_rule</span><span class=p>)</span>
 
 
-<span class=c1># Defection of precedence constraint</span>
+<span class=c1># Defition of precedence constraint</span>
 <span class=k>def</span> <span class=nf>precedence_constraint_rule</span><span class=p>(</span><span class=n>nrp</span><span class=p>:</span> <span class=n>AbstractModel</span><span class=p>,</span> <span class=n>i</span><span class=p>:</span> <span class=nb>int</span><span class=p>,</span> <span class=n>j</span><span class=p>:</span> <span class=nb>int</span><span class=p>):</span>
     <span class=k>return</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&gt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>j</span><span class=p>]</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>precedence_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>prerequisite</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>precedence_constraint_rule</span><span class=p>)</span>
@@ -249,13 +302,12 @@ $$</p>
     <span class=k>return</span> <span class=n>nrp</span><span class=o>.</span><span class=n>y</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=n>nrp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>k</span><span class=p>]</span>
 <span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>nrp_abs</span><span class=o>.</span><span class=n>interest</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>interest_constraint_rule</span><span class=p>)</span>
 </code></pre></div><p>Now, we have an abstract model. This is very powerful, we can provide different datasets to see how the model performs.</p>
-<p>Lets fill the model with actual data and solve it.</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>data_file_path</span> <span class=o>=</span> <span class=s1>&#39;../datasets/nrp_100c_140r.dat&#39;</span>
+<p>Lets fill the model with the actual data we have created before.</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>data_file_path</span> <span class=o>=</span> <span class=s1>&#39;data.dat&#39;</span>
 <span class=n>nrp_concrete</span> <span class=o>=</span> <span class=n>nrp_abs</span><span class=o>.</span><span class=n>create_instance</span><span class=p>(</span><span class=n>data_file_path</span><span class=p>)</span>
 </code></pre></div><h2 id=solving-the-model>Solving the model</h2>
 <p>We are using <a href=https://github.com/coin-or/Cbc>CBC</a> because it&rsquo;s an open source and fast, but if you desire you can use different solvers.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=kn>from</span> <span class=nn>pyomo.environ</span> <span class=kn>import</span> <span class=n>SolverFactory</span>
-<span class=n>nrp_concrete</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=mi>100</span>
 <span class=n>solver</span> <span class=o>=</span> <span class=n>SolverFactory</span><span class=p>(</span><span class=s1>&#39;cbc&#39;</span><span class=p>)</span>
 <span class=n>res</span> <span class=o>=</span> <span class=n>solver</span><span class=o>.</span><span class=n>solve</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=p>)</span>
 <span class=n>res</span><span class=o>.</span><span class=n>write</span><span class=p>()</span>
@@ -267,14 +319,14 @@ $$</p>
 # ----------------------------------------------------------
 Problem: 
 - Name: unknown
-  Lower bound: 563.0
-  Upper bound: 563.0
+  Lower bound: 70.0
+  Upper bound: 70.0
   Number of objectives: 1
-  Number of constraints: 375
-  Number of variables: 228
-  Number of binary variables: 240
-  Number of integer variables: 240
-  Number of nonzeros: 100
+  Number of constraints: 8
+  Number of variables: 6
+  Number of binary variables: 7
+  Number of integer variables: 7
+  Number of nonzeros: 2
   Sense: maximize
 # ----------------------------------------------------------
 #   Solver Information
@@ -282,54 +334,59 @@ Problem:
 Solver: 
 - Status: ok
   User time: -1.0
-  System time: 0.15
-  Wallclock time: 0.16
+  System time: 0.0
+  Wallclock time: 0.0
   Termination condition: optimal
   Termination message: Model was solved to optimality (subject to tolerances), and an optimal solution is available.
   Statistics: 
     Branch and bound: 
-      Number of bounded subproblems: 8
-      Number of created subproblems: 8
+      Number of bounded subproblems: 0
+      Number of created subproblems: 0
     Black box: 
-      Number of iterations: 353
+      Number of iterations: 0
   Error rc: 0
-  Time: 0.17249560356140137
+  Time: 0.018447399139404297
 # ----------------------------------------------------------
 #   Solution Information
 # ----------------------------------------------------------
 Solution: 
 - number of solutions: 0
   number of solutions displayed: 0
-</code></pre></div><p>As you can see, CBC has found an optimal solution in 0.17 seconds.</p>
+</code></pre></div><p>As you can see, CBC has found an optimal solution in 0.018 seconds.</p>
 <h2 id=exploring-the-solution>Exploring the solution</h2>
-<p>We can see the whole model using <code>pyo.display(nrp_concrete)</code> or we can use <code>pyo.display</code> on the parts where we are interested</p>
+<p>We can explore the whole model using <code>pyo.display(nrp_concrete)</code> or we can use <code>pyo.display</code> on the parts that we need.</p>
 <p>If we print the objective function, we&rsquo;ll get:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Print the value of the objective function</span>
 <span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=o>.</span><span class=n>OBJ</span><span class=p>)</span>
 </code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>OBJ : Size=1, Index=None, Active=True
     Key  : Active : Value
-    None :   True : 985.0
-</code></pre></div><p>That means, the optimal solution for this model costs 985 monetary units.</p>
+    None :   True :  70.0
+</code></pre></div><p>That means, the optimal solution for this model will give us 70 units of benefit</p>
 <p>If we want to see which requirements should be implemented, we have to display the variables associated with them.</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Display of variables associated to requirements</span>
 <span class=c1># Value == 1 means the requirement is implemented</span>
 <span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
-</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>Variables:
-    x : Size=140, Index=requirements
-        Key : Lower : Value : Upper : Fixed : Stale : Domain
-          1 :     0 :   0.0 :     1 : False : False : Binary
-          2 :     0 :   1.0 :     1 : False : False : Binary
-          3 :     0 :   1.0 :     1 : False : False : Binary
-          4 :     0 :   0.0 :     1 : False : False : Binary
-          5 :     0 :   0.0 :     1 : False : False : Binary
-          6 :     0 :   0.0 :     1 : False : False : Binary
-          7 :     0 :   1.0 :     1 : False : False : Binary
-          8 :     0 :   0.0 :     1 : False : False : Binary
-</code></pre></div><p>We have cut down the output to make it more readable.
-In this output, the variables with value of 1 are the ones that should be implemented.</p>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>x : Size=5, Index=requirements
+    Key : Lower : Value : Upper : Fixed : Stale : Domain
+      1 :     0 :   1.0 :     1 : False : False : Binary
+      2 :     0 :   1.0 :     1 : False : False : Binary
+      3 :     0 :   0.0 :     1 : False : False : Binary
+      4 :     0 :   0.0 :     1 : False : False : Binary
+      5 :     0 :   1.0 :     1 : False : False : Binary
+</code></pre></div><p>In this output, the variables with value of 1 are the ones that should be implemented. So, requirements 1,2 and 5 are implemented.</p>
+<p>To see which stakeholders are satisfied:</p>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>nrp_concrete</span><span class=o>.</span><span class=n>y</span><span class=p>)</span>
+</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-text data-lang=text>y : Size=2, Index=stakeholders
+    Key : Lower : Value : Upper : Fixed : Stale : Domain
+      1 :     0 :   1.0 :     1 : False : False : Binary
+      2 :     0 :   0.0 :     1 : False : False : Binary
+</code></pre></div><p>Stakeholder 1 has a value of 1, this means all of his requirements are implemented.</p>
+<p>If we check <a href=#fictional-problem>the problem definition</a>, we have said that stakeholder A has interest over requierement 1 and 5. The model say that we have to implement requirement 1,2 and 5. Therefore, we fulfill stakeholder A needs and we have its profits.</p>
 <h1 id=conclusion>Conclusion</h1>
 <p>This model can be very helpful in an environment with multiple stakeholders and multiple requirements. It can help
-us reducing the complexity of making a decision. But what if we want to plan the releases for the whole project? In next blog posts we&rsquo;ll address this problem with another model.</p>
+us reducing the complexity of making a decision. But this model is not perfect. Have you noticed how implementing a requierement
+give us no benefit? In our result, we only get the benefit of the stakeholders. Also, what if we want to plan the releases for the whole project?
+In next blog posts we&rsquo;ll address these problems with another model.</p>
 <div class=blog-tags>
 <a href=https://giicis.github.io//tags/optimization/>optimization</a>&nbsp;
 <a href=https://giicis.github.io//tags/cbc/>cbc</a>&nbsp;
