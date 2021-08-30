@@ -6,7 +6,7 @@
 <title>Release planning problem - GIICIS</title>
 <meta name=description content="A more powerful model than the next release problem which can provide a schedule of how a project need to plan its releases.">
 <meta name=author content="Leonardo Hoet"><script type=application/ld+json>{"@context":"http://schema.org","@type":"WebSite","name":"GIICIS","url":"https:\/\/giicis.github.io\/"}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Organization","name":"","url":"https:\/\/giicis.github.io\/"}</script>
-<script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/giicis.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/giicis.github.io\/posts\/rpp\/","name":"Release planning problem"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Leonardo Hoet"},"headline":"Release planning problem","description":"A more powerful model than the next release problem which can provide a schedule of how a project need to plan its releases.\n","inLanguage":"en","wordCount":1802,"datePublished":"2021-08-11T10:00:10","dateModified":"2021-08-11T10:00:10","image":"https:\/\/giicis.github.io\/giicis.png","keywords":["optimization, cbc, rpp, linear programming"],"mainEntityOfPage":"https:\/\/giicis.github.io\/posts\/rpp\/","publisher":{"@type":"Organization","name":"https:\/\/giicis.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/giicis.github.io\/giicis.png","height":60,"width":60}}}</script>
+<script type=application/ld+json>{"@context":"http://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"item":{"@id":"https:\/\/giicis.github.io\/","name":"home"}},{"@type":"ListItem","position":3,"item":{"@id":"https:\/\/giicis.github.io\/posts\/rpp\/","name":"Release planning problem"}}]}</script><script type=application/ld+json>{"@context":"http://schema.org","@type":"Article","author":{"name":"Leonardo Hoet"},"headline":"Release planning problem","description":"A more powerful model than the next release problem which can provide a schedule of how a project need to plan its releases.\n","inLanguage":"en","wordCount":1733,"datePublished":"2021-08-11T10:00:10","dateModified":"2021-08-11T10:00:10","image":"https:\/\/giicis.github.io\/giicis.png","keywords":["optimization, cbc, rpp, linear programming"],"mainEntityOfPage":"https:\/\/giicis.github.io\/posts\/rpp\/","publisher":{"@type":"Organization","name":"https:\/\/giicis.github.io\/","logo":{"@type":"ImageObject","url":"https:\/\/giicis.github.io\/giicis.png","height":60,"width":60}}}</script>
 <meta property="og:title" content="Release planning problem">
 <meta property="og:description" content="A more powerful model than the next release problem which can provide a schedule of how a project need to plan its releases.">
 <meta property="og:image" content="https://giicis.github.io/giicis.png">
@@ -178,7 +178,7 @@ $$</p>
 \sum_{l=1}^{k+1} y_{li} = 1 \quad \forall i \in {1,\dotsc ,n}
 $$</p>
 <ol start=3>
-<li>Cost constraint: The sum of the effort for each requirement in the release must be less or equal than the max affordable cost</li>
+<li>Effort constraint: The sum of the effort for each requirement in the release must be less or equal than the max affordable cost</li>
 </ol>
 <p>$$
 \sum_{i=1}^{n} e_i \cdot y_{li} \leq p \quad \forall l \in {1, \dotsc ,k+1 }
@@ -219,9 +219,9 @@ $$</p>
 </span><span class=s2>    Given an rpp model with A matrix
 </span><span class=s2>    Normalize each row, so the sum of elements per row is 1
 </span><span class=s2>    &#34;&#34;&#34;</span>
-    <span class=n>A</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>zeros</span><span class=p>((</span><span class=n>rpp</span><span class=o>.</span><span class=n>number_of_stakeholders</span><span class=o>.</span><span class=n>value</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_requierements</span><span class=o>.</span><span class=n>value</span><span class=p>))</span>
+    <span class=n>A</span> <span class=o>=</span> <span class=n>np</span><span class=o>.</span><span class=n>zeros</span><span class=p>((</span><span class=n>rpp</span><span class=o>.</span><span class=n>number_of_stakeholders</span><span class=o>.</span><span class=n>value</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_requirements</span><span class=o>.</span><span class=n>value</span><span class=p>))</span>
        
-    <span class=c1># Assing rpp.A values to A</span>
+    <span class=c1># Assign rpp.A values to A</span>
     <span class=k>for</span> <span class=p>(</span><span class=n>i</span><span class=p>,</span> <span class=n>j</span><span class=p>)</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>A</span><span class=o>.</span><span class=n>index_set</span><span class=p>():</span>
         <span class=n>A</span><span class=p>[</span><span class=n>i</span> <span class=o>-</span> <span class=mi>1</span><span class=p>,</span> <span class=n>j</span> <span class=o>-</span> <span class=mi>1</span><span class=p>]</span> <span class=o>=</span> <span class=n>rpp</span><span class=o>.</span><span class=n>A</span><span class=p>[</span><span class=n>i</span><span class=p>,</span> <span class=n>j</span><span class=p>]</span><span class=o>.</span><span class=n>value</span>
 
@@ -252,35 +252,37 @@ $$</p>
     <span class=n>rpp</span><span class=o>.</span><span class=n>releases</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_releases</span><span class=p>)</span>
     
     <span class=c1># Parameters defined over previous defined sets</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>cost</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>profit</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>)</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>efforts</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>profits</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>)</span>
     
     <span class=c1># Relations defined over the cartesian product of sets</span>
-    <span class=c1># (i,j) requierement i should be implemented if j is implemented</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>precedence</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
-    <span class=c1># (s,i) &gt; 0 if stakeholder s has interest over requierement i</span>
-    <span class=c1># This relation is here beacuse the dataset have this information</span>
+    <span class=c1># (i,j) requirement i should be implemented if j is implemented</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>precedences</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+    <span class=c1># (s,i) &gt; 0 if stakeholder s has interest over requirement i</span>
+    <span class=c1># This relation is here because the dataset have this information</span>
     <span class=c1># We are using this to initialize matrix A</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>interest</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>interests</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Set</span><span class=p>(</span><span class=n>within</span><span class=o>=</span><span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
 
-    <span class=c1># We use this function to assign a requierement priority for each stakeholder</span>
+    <span class=c1># We use this function to assign a requirement priority for each stakeholder</span>
     <span class=c1># This is because the dataset we are using does not have this information</span>
     <span class=k>def</span> <span class=nf>A_init</span><span class=p>(</span><span class=n>rpp</span><span class=p>,</span> <span class=n>s</span><span class=p>,</span> <span class=n>i</span><span class=p>):</span>
-        <span class=k>if</span> <span class=p>(</span><span class=n>s</span><span class=p>,</span> <span class=n>i</span><span class=p>)</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>interest</span><span class=p>:</span>
+        <span class=k>if</span> <span class=p>(</span><span class=n>s</span><span class=p>,</span> <span class=n>i</span><span class=p>)</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>interests</span><span class=p>:</span>
             <span class=k>return</span> <span class=mi>1</span>
         <span class=k>return</span> <span class=mi>0</span>
     <span class=c1># This parameter needs to be mutable so later on we can normalize it</span>
     <span class=n>rpp</span><span class=o>.</span><span class=n>A</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Param</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>initialize</span><span class=o>=</span><span class=n>A_init</span><span class=p>,</span> <span class=n>mutable</span><span class=o>=</span><span class=kc>True</span><span class=p>)</span>
 
     <span class=c1># Variables</span>
-    <span class=c1># Store the number in which the requierement is implemented</span>
+    <span class=c1># Store the number in which the requirement is implemented</span>
     <span class=n>rpp</span><span class=o>.</span><span class=n>x</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Integers</span><span class=p>)</span>
-    <span class=c1># y[l,i] == 1 if requierement i is implemented in l release</span>
+    <span class=c1># y[l,i] == 1 if requirement i is implemented in l release</span>
     <span class=n>rpp</span><span class=o>.</span><span class=n>y</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Var</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>releases</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>domain</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>Binary</span><span class=p>)</span>
 
-    <span class=c1># Objetive function</span>
+    <span class=c1># Objective function</span>
     <span class=k>def</span> <span class=nf>obj_function_rule</span><span class=p>(</span><span class=n>rpp</span><span class=p>):</span>
-        <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>profit</span><span class=p>[</span><span class=n>s</span><span class=p>]</span> <span class=o>*</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>A</span><span class=p>[</span><span class=n>s</span><span class=p>,</span> <span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_releases</span> <span class=o>-</span> <span class=n>rpp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span> <span class=k>for</span> <span class=n>s</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>)</span>
+        <span class=n>inner_sum</span> <span class=o>=</span> <span class=k>lambda</span> <span class=n>s</span><span class=p>:</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>A</span><span class=p>[</span><span class=n>s</span><span class=p>,</span> <span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>number_of_releases</span> <span class=o>-</span> <span class=n>rpp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>])</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span>
+        <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>profits</span><span class=p>[</span><span class=n>s</span><span class=p>]</span> <span class=o>*</span> <span class=n>inner_sum</span><span class=p>(</span><span class=n>s</span><span class=p>)</span> <span class=k>for</span> <span class=n>s</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>stakeholders</span><span class=p>)</span>
+        <span class=c1>#return sum(rpp.profits[s] * sum(rpp.A[s, i] * rpp.number_of_releases - rpp.x[i] for i in rpp.requirements) for s in rpp.stakeholders)</span>
     <span class=n>rpp</span><span class=o>.</span><span class=n>OBJ</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Objective</span><span class=p>(</span><span class=n>rule</span><span class=o>=</span><span class=n>obj_function_rule</span><span class=p>,</span> <span class=n>sense</span><span class=o>=</span><span class=n>pyo</span><span class=o>.</span><span class=n>maximize</span><span class=p>)</span>
 
     <span class=c1># Constraints</span>
@@ -292,77 +294,40 @@ $$</p>
         <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>y</span><span class=p>[</span><span class=n>l</span><span class=p>,</span> <span class=n>i</span><span class=p>]</span> <span class=k>for</span> <span class=n>l</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>releases</span><span class=p>)</span> <span class=o>==</span> <span class=mi>1</span>
     <span class=n>rpp</span><span class=o>.</span><span class=n>implementation_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>implementation_constraint_rule</span><span class=p>)</span>
 
-    <span class=k>def</span> <span class=nf>cost_constraint_rule</span><span class=p>(</span><span class=n>rpp</span><span class=p>,</span> <span class=n>l</span><span class=p>):</span>
-        <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>cost</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>y</span><span class=p>[</span><span class=n>l</span><span class=p>,</span> <span class=n>i</span><span class=p>]</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=n>rpp</span><span class=o>.</span><span class=n>max_cost</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>cost_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_releases</span> <span class=o>-</span> <span class=mi>1</span><span class=p>),</span> <span class=n>rule</span><span class=o>=</span><span class=n>cost_constraint_rule</span><span class=p>)</span>
+    <span class=k>def</span> <span class=nf>effort_constraint_rule</span><span class=p>(</span><span class=n>rpp</span><span class=p>,</span> <span class=n>l</span><span class=p>):</span>
+        <span class=k>return</span> <span class=nb>sum</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>efforts</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>*</span> <span class=n>rpp</span><span class=o>.</span><span class=n>y</span><span class=p>[</span><span class=n>l</span><span class=p>,</span> <span class=n>i</span><span class=p>]</span> <span class=k>for</span> <span class=n>i</span> <span class=ow>in</span> <span class=n>rpp</span><span class=o>.</span><span class=n>requirements</span><span class=p>)</span> <span class=o>&lt;=</span> <span class=n>rpp</span><span class=o>.</span><span class=n>max_cost</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>efforts_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>pyo</span><span class=o>.</span><span class=n>RangeSet</span><span class=p>(</span><span class=mi>1</span><span class=p>,</span> <span class=n>rpp</span><span class=o>.</span><span class=n>number_of_releases</span> <span class=o>-</span> <span class=mi>1</span><span class=p>),</span> <span class=n>rule</span><span class=o>=</span><span class=n>effort_constraint_rule</span><span class=p>)</span>
 
-    <span class=k>def</span> <span class=nf>precende_constraint_rule</span><span class=p>(</span><span class=n>rpp</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=n>j</span><span class=p>):</span>
+    <span class=k>def</span> <span class=nf>precedence</span><span class=p>(</span><span class=n>rpp</span><span class=p>,</span> <span class=n>i</span><span class=p>,</span> <span class=n>j</span><span class=p>):</span>
         <span class=k>return</span> <span class=n>rpp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>i</span><span class=p>]</span> <span class=o>&lt;=</span> <span class=n>rpp</span><span class=o>.</span><span class=n>x</span><span class=p>[</span><span class=n>j</span><span class=p>]</span>
-    <span class=n>rpp</span><span class=o>.</span><span class=n>precedence_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>precedence</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>precende_constraint_rule</span><span class=p>)</span>
+    <span class=n>rpp</span><span class=o>.</span><span class=n>precedences_constraint</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>Constraint</span><span class=p>(</span><span class=n>rpp</span><span class=o>.</span><span class=n>precedences</span><span class=p>,</span> <span class=n>rule</span><span class=o>=</span><span class=n>precedence_constraint_rule</span><span class=p>)</span>
     
     <span class=k>return</span> <span class=n>rpp</span>
 </code></pre></div><p>Create, fill and solve the model described <a href=#implementation>above</a>.</p>
-<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># Define the name of the solver to use</span>
+<div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=c1># This is the actual code that solves the problem</span>
+
+<span class=c1># Define the name of the solver to use</span>
 <span class=n>solver_name</span> <span class=o>=</span> <span class=s1>&#39;cbc&#39;</span>
-<span class=n>data_file</span> <span class=o>=</span> <span class=s2>&#34;data.dat&#34;</span>
+<span class=n>data_file</span> <span class=o>=</span> <span class=s2>&#34;./datasets/rpp_data.dat&#34;</span>
 
 <span class=c1># Create the abstract model</span>
 <span class=n>rpp</span> <span class=o>=</span> <span class=n>abstract_model</span><span class=p>()</span>
 <span class=c1># Fill the model with concrete values</span>
 <span class=n>rpp_concrete</span> <span class=o>=</span> <span class=n>rpp</span><span class=o>.</span><span class=n>create_instance</span><span class=p>(</span><span class=n>data</span><span class=o>=</span><span class=n>data_file</span><span class=p>)</span>
+<span class=n>rpp_concrete</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=mi>40</span>
 
-
-<span class=c1># Because we dont now what priority  stakeholders are going to assing to each requierement</span>
-<span class=c1># the normalization must be donde with a concrete instance</span>
+<span class=c1># Because we dont now what priority  stakeholders are going to assign to each requierement</span>
+<span class=c1># the normalization must be done with a concrete instance</span>
 <span class=n>A_normalizate</span><span class=p>(</span><span class=n>rpp_concrete</span><span class=p>)</span>
 
 <span class=c1># Create a new solver instance</span>
 <span class=n>solver</span> <span class=o>=</span> <span class=n>pyo</span><span class=o>.</span><span class=n>SolverFactory</span><span class=p>(</span><span class=n>solver_name</span><span class=p>)</span>
-
+<span class=k>if</span> <span class=n>solver</span><span class=o>.</span><span class=n>name</span> <span class=o>!=</span> <span class=s1>&#39;glpk&#39;</span><span class=p>:</span>
+    <span class=c1># Assign 4 threads to the solver</span>
+    <span class=n>solver</span><span class=o>.</span><span class=n>options</span><span class=p>[</span><span class=s1>&#39;threads&#39;</span><span class=p>]</span> <span class=o>=</span> <span class=mi>4</span>
 <span class=c1># Solve the model and display the solution</span>
 <span class=n>res</span> <span class=o>=</span> <span class=n>solver</span><span class=o>.</span><span class=n>solve</span><span class=p>(</span><span class=n>rpp_concrete</span><span class=p>)</span>
-<span class=n>res</span><span class=o>.</span><span class=n>write</span><span class=p>()</span>
-</code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback># ==========================================================
-# = Solver Results                                         =
-# ==========================================================
-# ----------------------------------------------------------
-#   Problem Information
-# ----------------------------------------------------------
-Problem: 
-- Name: unknown
-  Lower bound: -480.0
-  Upper bound: -480.0
-  Number of objectives: 1
-  Number of constraints: 7
-  Number of variables: 15
-  Number of binary variables: 15
-  Number of integer variables: 20
-  Number of nonzeros: 15
-  Sense: maximize
-# ----------------------------------------------------------
-#   Solver Information
-# ----------------------------------------------------------
-Solver: 
-- Status: ok
-  User time: -1.0
-  System time: 0.01
-  Wallclock time: 0.01
-  Termination condition: optimal
-  Termination message: Model was solved to optimality (subject to tolerances), and an optimal solution is available.
-  Statistics: 
-    Branch and bound: 
-      Number of bounded subproblems: 0
-      Number of created subproblems: 0
-    Black box: 
-      Number of iterations: 0
-  Error rc: 0
-  Time: 0.020304441452026367
-# ----------------------------------------------------------
-#   Solution Information
-# ----------------------------------------------------------
-Solution: 
-- number of solutions: 0
-  number of solutions displayed: 0
+<span class=n>res</span><span class=p>[</span><span class=s1>&#39;Solver&#39;</span><span class=p>][</span><span class=mi>0</span><span class=p>][</span><span class=s1>&#39;Status&#39;</span><span class=p>]</span>
 </code></pre></div><h2 id=exploring-the-solution>Exploring the solution</h2>
 <p>We can ask pyomo information about the solution with <code>pyo.display</code>.</p>
 <p>To see which requirements should be implemented in each release</p>
@@ -370,12 +335,12 @@ Solution:
 </code></pre></div><div class=highlight><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback>x : Size=5, Index=requirements
     Key : Lower : Value : Upper : Fixed : Stale : Domain
       1 :  None :   1.0 :  None : False : False : Integers
-      2 :  None :   1.0 :  None : False : False : Integers
-      3 :  None :   2.0 :  None : False : False : Integers
-      4 :  None :   2.0 :  None : False : False : Integers
-      5 :  None :   1.0 :  None : False : False : Integers
-</code></pre></div><p>Requirement 1,2 and 5 need to be implemented in the first release. Meanwhile, requirement 3 and 4 should be implemented in a second release.</p>
-<p>If we lower the <code>max_cost</code> and solve the model again, we can see how the schedule changes:</p>
+      2 :  None :   2.0 :  None : False : False : Integers
+      3 :  None :   3.0 :  None : False : False : Integers
+      4 :  None :   3.0 :  None : False : False : Integers
+      5 :  None :   2.0 :  None : False : False : Integers
+</code></pre></div><p>Requirement 1 is the only one that can be implemented in the first release because it has a cost of 40 and our max cost is 40. In the second release requirements 2 and 5 will be implemented. Finally, requirements 3 and 4 are left to implement in the future.</p>
+<p>If we raise the <code>max_cost</code> and solve the model again, we can see how the schedule changes:</p>
 <div class=highlight><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=n>rpp_concrete</span><span class=o>.</span><span class=n>max_cost</span> <span class=o>=</span> <span class=mi>50</span>
 <span class=n>solver</span><span class=o>.</span><span class=n>solve</span><span class=p>(</span><span class=n>rpp_concrete</span><span class=p>)</span>
 <span class=n>pyo</span><span class=o>.</span><span class=n>display</span><span class=p>(</span><span class=n>rpp_concrete</span><span class=o>.</span><span class=n>x</span><span class=p>)</span>
@@ -389,10 +354,8 @@ Solution:
 </code></pre></div><p>Here, requirement 4 is left to implement in a future release.</p>
 <h1 id=conclusion>Conclusion</h1>
 <p>As we have seen, this model provides a more powerful approach than the <a href=https://giicis.github.io/posts/nrp/>next release problem</a>.
-Nonetheless, it still has problems. Right now, we are assuming that stakeholders have an unhuman behavior since it is the same if 90%
-of their requirements are implemented and none of them are implemented. What we need, is a model where the satisfaction of
-the stakeholders is not binary. It needs to take a value based on how much the stakeholder is satisfied.</p>
-<p>In the next blog post, we&rsquo;ll address this problem using fuzzy logic.</p>
+Nonetheless, it still has drawbacks. Right now, we are assuming that the effort to implement a requirement is constant and it will not change during its implementation. In the software engineering world we know this is not true. Most of the time, a requirement needs more effort to complete.
+In the next blog post, we&rsquo;ll see how this problem can be modeled and solved using fuzzy logic.</p>
 <div class=blog-tags>
 <a href=https://giicis.github.io//tags/optimization/>optimization</a>&nbsp;
 <a href=https://giicis.github.io//tags/cbc/>cbc</a>&nbsp;
