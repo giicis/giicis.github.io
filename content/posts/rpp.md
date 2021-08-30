@@ -74,7 +74,7 @@ $$
 \sum_{l=1}^{k+1} y_{li} = 1 \quad \forall i \in \{1,\dotsc ,n\}
 $$
 
-3) Cost constraint: The sum of the effort for each requirement in the release must be less or equal than the max affordable cost
+3) Effort constraint: The sum of the effort for each requirement in the release must be less or equal than the max affordable cost
 
 $$
 \sum_{i=1}^{n} e_i \cdot y_{li} \leq p \quad \forall l \in \{1, \dotsc ,k+1 \}
@@ -129,9 +129,9 @@ def A_normalizate(rpp):
     Given an rpp model with A matrix
     Normalize each row, so the sum of elements per row is 1
     """
-    A = np.zeros((rpp.number_of_stakeholders.value, rpp.number_of_requierements.value))
+    A = np.zeros((rpp.number_of_stakeholders.value, rpp.number_of_requirements.value))
        
-    # Assing rpp.A values to A
+    # Assign rpp.A values to A
     for (i, j) in rpp.A.index_set():
         A[i - 1, j - 1] = rpp.A[i, j].value
 
@@ -165,35 +165,37 @@ def abstract_model():
     rpp.releases = pyo.RangeSet(1, rpp.number_of_releases)
     
     # Parameters defined over previous defined sets
-    rpp.cost = pyo.Param(rpp.requirements)
-    rpp.profit = pyo.Param(rpp.stakeholders)
+    rpp.efforts = pyo.Param(rpp.requirements)
+    rpp.profits = pyo.Param(rpp.stakeholders)
     
     # Relations defined over the cartesian product of sets
-    # (i,j) requierement i should be implemented if j is implemented
-    rpp.precedence = pyo.Set(within=rpp.requirements * rpp.requirements)
-    # (s,i) > 0 if stakeholder s has interest over requierement i
-    # This relation is here beacuse the dataset have this information
+    # (i,j) requirement i should be implemented if j is implemented
+    rpp.precedences = pyo.Set(within=rpp.requirements * rpp.requirements)
+    # (s,i) > 0 if stakeholder s has interest over requirement i
+    # This relation is here because the dataset have this information
     # We are using this to initialize matrix A
-    rpp.interest = pyo.Set(within=rpp.stakeholders * rpp.requirements)
+    rpp.interests = pyo.Set(within=rpp.stakeholders * rpp.requirements)
 
-    # We use this function to assign a requierement priority for each stakeholder
+    # We use this function to assign a requirement priority for each stakeholder
     # This is because the dataset we are using does not have this information
     def A_init(rpp, s, i):
-        if (s, i) in rpp.interest:
+        if (s, i) in rpp.interests:
             return 1
         return 0
     # This parameter needs to be mutable so later on we can normalize it
     rpp.A = pyo.Param(rpp.stakeholders, rpp.requirements, initialize=A_init, mutable=True)
 
     # Variables
-    # Store the number in which the requierement is implemented
+    # Store the number in which the requirement is implemented
     rpp.x = pyo.Var(rpp.requirements, domain=pyo.Integers)
-    # y[l,i] == 1 if requierement i is implemented in l release
+    # y[l,i] == 1 if requirement i is implemented in l release
     rpp.y = pyo.Var(rpp.releases, rpp.requirements, domain=pyo.Binary)
 
-    # Objetive function
+    # Objective function
     def obj_function_rule(rpp):
-        return sum(rpp.profit[s] * sum(rpp.A[s, i] * rpp.number_of_releases - rpp.x[i] for i in rpp.requirements) for s in rpp.stakeholders)
+        inner_sum = lambda s: sum(rpp.A[s, i] * (rpp.number_of_releases - rpp.x[i]) for i in rpp.requirements)
+        return sum(rpp.profits[s] * inner_sum(s) for s in rpp.stakeholders)
+        #return sum(rpp.profits[s] * sum(rpp.A[s, i] * rpp.number_of_releases - rpp.x[i] for i in rpp.requirements) for s in rpp.stakeholders)
     rpp.OBJ = pyo.Objective(rule=obj_function_rule, sense=pyo.maximize)
 
     # Constraints
@@ -205,84 +207,43 @@ def abstract_model():
         return sum(rpp.y[l, i] for l in rpp.releases) == 1
     rpp.implementation_constraint = pyo.Constraint(rpp.requirements, rule=implementation_constraint_rule)
 
-    def cost_constraint_rule(rpp, l):
-        return sum(rpp.cost[i] * rpp.y[l, i] for i in rpp.requirements) <= rpp.max_cost
-    rpp.cost_constraint = pyo.Constraint(pyo.RangeSet(1, rpp.number_of_releases - 1), rule=cost_constraint_rule)
+    def effort_constraint_rule(rpp, l):
+        return sum(rpp.efforts[i] * rpp.y[l, i] for i in rpp.requirements) <= rpp.max_cost
+    rpp.efforts_constraint = pyo.Constraint(pyo.RangeSet(1, rpp.number_of_releases - 1), rule=effort_constraint_rule)
 
-    def precende_constraint_rule(rpp, i, j):
+    def precedence(rpp, i, j):
         return rpp.x[i] <= rpp.x[j]
-    rpp.precedence_constraint = pyo.Constraint(rpp.precedence, rule=precende_constraint_rule)
+    rpp.precedences_constraint = pyo.Constraint(rpp.precedences, rule=precedence_constraint_rule)
     
     return rpp
 ```
 
 Create, fill and solve the model described [above](#implementation).
 ```python
+# This is the actual code that solves the problem
+
 # Define the name of the solver to use
 solver_name = 'cbc'
-data_file = "data.dat"
+data_file = "./datasets/rpp_data.dat"
 
 # Create the abstract model
 rpp = abstract_model()
 # Fill the model with concrete values
 rpp_concrete = rpp.create_instance(data=data_file)
+rpp_concrete.max_cost = 40
 
-
-# Because we dont now what priority  stakeholders are going to assing to each requierement
-# the normalization must be donde with a concrete instance
+# Because we dont now what priority  stakeholders are going to assign to each requierement
+# the normalization must be done with a concrete instance
 A_normalizate(rpp_concrete)
 
 # Create a new solver instance
 solver = pyo.SolverFactory(solver_name)
-
+if solver.name != 'glpk':
+    # Assign 4 threads to the solver
+    solver.options['threads'] = 4
 # Solve the model and display the solution
 res = solver.solve(rpp_concrete)
-res.write()
-```
-
-
-```
-# ==========================================================
-# = Solver Results                                         =
-# ==========================================================
-# ----------------------------------------------------------
-#   Problem Information
-# ----------------------------------------------------------
-Problem: 
-- Name: unknown
-  Lower bound: -480.0
-  Upper bound: -480.0
-  Number of objectives: 1
-  Number of constraints: 7
-  Number of variables: 15
-  Number of binary variables: 15
-  Number of integer variables: 20
-  Number of nonzeros: 15
-  Sense: maximize
-# ----------------------------------------------------------
-#   Solver Information
-# ----------------------------------------------------------
-Solver: 
-- Status: ok
-  User time: -1.0
-  System time: 0.01
-  Wallclock time: 0.01
-  Termination condition: optimal
-  Termination message: Model was solved to optimality (subject to tolerances), and an optimal solution is available.
-  Statistics: 
-    Branch and bound: 
-      Number of bounded subproblems: 0
-      Number of created subproblems: 0
-    Black box: 
-      Number of iterations: 0
-  Error rc: 0
-  Time: 0.020304441452026367
-# ----------------------------------------------------------
-#   Solution Information
-# ----------------------------------------------------------
-Solution: 
-- number of solutions: 0
-  number of solutions displayed: 0
+res['Solver'][0]['Status']
 ```
 
 
@@ -300,15 +261,15 @@ pyo.display(rpp_concrete.x)
 x : Size=5, Index=requirements
     Key : Lower : Value : Upper : Fixed : Stale : Domain
       1 :  None :   1.0 :  None : False : False : Integers
-      2 :  None :   1.0 :  None : False : False : Integers
-      3 :  None :   2.0 :  None : False : False : Integers
-      4 :  None :   2.0 :  None : False : False : Integers
-      5 :  None :   1.0 :  None : False : False : Integers
+      2 :  None :   2.0 :  None : False : False : Integers
+      3 :  None :   3.0 :  None : False : False : Integers
+      4 :  None :   3.0 :  None : False : False : Integers
+      5 :  None :   2.0 :  None : False : False : Integers
 ```
 
-Requirement 1,2 and 5 need to be implemented in the first release. Meanwhile, requirement 3 and 4 should be implemented in a second release.
+Requirement 1 is the only one that can be implemented in the first release because it has a cost of 40 and our max cost is 40. In the second release requirements 2 and 5 will be implemented. Finally, requirements 3 and 4 are left to implement in the future.
 
-If we lower the `max_cost` and solve the model again, we can see how the schedule changes:
+If we raise the `max_cost` and solve the model again, we can see how the schedule changes:
  
 
 ```python
@@ -331,8 +292,5 @@ Here, requirement 4 is left to implement in a future release.
 
 # Conclusion 
 As we have seen, this model provides a more powerful approach than the [next release problem](https://giicis.github.io/posts/nrp/).
-Nonetheless, it still has problems. Right now, we are assuming that stakeholders have an unhuman behavior since it is the same if 90% 
-of their requirements are implemented and none of them are implemented. What we need, is a model where the satisfaction of 
-the stakeholders is not binary. It needs to take a value based on how much the stakeholder is satisfied.
-
-In the next blog post, we'll address this problem using fuzzy logic.
+Nonetheless, it still has drawbacks. Right now, we are assuming that the effort to implement a requirement is constant and it will not change during its implementation. In the software engineering world we know this is not true. Most of the time, a requirement needs more effort to complete. 
+In the next blog post, we'll see how this problem can be modeled and solved using  fuzzy logic.
